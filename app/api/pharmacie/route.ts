@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
       id: String(Date.now()),
       produitId: newProduit.id,
       quantite: 0,
+      lot: `LOT${String(Date.now()).slice(-6)}`,
+      datePeremption: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 an
     });
     
     return NextResponse.json({
