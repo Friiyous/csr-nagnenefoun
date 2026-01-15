@@ -28,7 +28,7 @@ export const DISTRICTS: Record<string, string[]> = {
   'Lacs': ['Dimbokro', 'Toumodi', 'Yamoussoukro'],
   'Lagunes': ['Agboville', 'Dabou', 'Grand-Lahou'],
   'Montagnes': ['Man', 'Duékoué', 'Bangolo'],
-  'Poro': ['Korhogo', 'M'Bengué', 'Sinématiali', 'Koumporodougou'],
+  'Poro': ["Korhogo", "M'Bengué", "Sinématiali", "Koumporodougou"],
   'Sassandra-Marahoué': ['Bouaflé', 'Sinfra', 'Zuénoula'],
   'Savanes': ['Korhogo', 'Boundiali', 'Ferkessédougou'],
   'Vallée du Bandama': ['Bouaké', 'Séguéla', 'Mankono'],
