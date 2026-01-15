@@ -8,7 +8,7 @@ import { exportToPDF, exportToExcel, formatDataForExport } from '@/lib/export';
 type ExportFormat = 'csv' | 'excel' | 'pdf';
 
 interface ExportButtonProps {
-  data: Record<string, unknown>[];
+  data: any[];
   filename: string;
   title?: string;
   headers?: string[];
