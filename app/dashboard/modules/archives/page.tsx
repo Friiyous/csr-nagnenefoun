@@ -112,7 +112,20 @@ export default function ArchivesPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Archives et Documents</h1>
         <div className="flex gap-2">
-          <ExportButton data={archives} filename="archives" title="Exporter" />
+          <ExportButton 
+            data={archives.map(a => ({ 
+              id: a.id, 
+              titre: a.titre, 
+              type: a.type, 
+              categorie: a.categorie, 
+              date: a.date, 
+              taille: a.taille, 
+              format: a.format,
+              auteur: a.author 
+            }))} 
+            filename="archives" 
+            title="Exporter" 
+          />
           <Button onClick={() => setShowModal(true)}>+ Ajouter un document</Button>
         </div>
       </div>
