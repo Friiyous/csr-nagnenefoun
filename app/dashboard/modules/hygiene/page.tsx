@@ -148,7 +148,7 @@ export default function HygienePage() {
     { id: '2', date_signalement: '2025-01-13', espace: 'Local incinérateur', description: 'Joints de la porte de combustion usés, fumée visible', priorite: 'ELEVEE', statut: 'EN_COURS', responsable: 'Diallo Ali', observations: 'En attente livraison joints' },
     { id: '3', date_signalement: '2025-01-12', espace: 'Toilettes personnel', description: 'Fuite sous le lavabo du WC n°1', priorite: 'MOYENNE', statut: 'SIGNALE', responsable: 'Bamba Paul' },
     { id: '4', date_signalement: '2025-01-10', espace: 'Pompe doseuse chlore', description: 'Pompe ne dose plus, indicateurs au rouge', priorite: 'CRITIQUE', statut: 'EN_COURS', responsable: 'Diallo Ali', observations: 'Technicien contacté' },
-    { id: '5', date_signalement: '2025-01-08', espace: 'Autoclave', description: 'Message d\'erreur sur la température', priorite: 'ELEVEE', statut: 'EN_REPARATION', responsable: 'Technicien externe', date_resolution: '2025-01-20', observations: 'Sous garantie' },
+    { id: '5', date_signalement: '2025-01-08', espace: 'Autoclave', description: 'Message d\'erreur sur la température', priorite: 'ELEVEE', statut: 'EN_COURS', responsable: 'Technicien externe', date_resolution: '2025-01-20', observations: 'Sous garantie' },
     { id: '6', date_signalement: '2025-01-05', espace: 'Local déchets', description: 'Ventilation insuffisante, odeur persistante', priorite: 'FAIBLE', statut: 'RESOLU', responsable: 'Bamba Paul', date_resolution: '2025-01-10', observations: 'Ventilateur ajouté' },
   ];
 
