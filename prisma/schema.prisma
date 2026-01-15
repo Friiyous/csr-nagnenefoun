@@ -1,0 +1,381 @@
+// Schéma Prisma pour EPS Manager
+// Compatible avec Supabase (PostgreSQL + UUID)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Établissements Publics de Santé
+model EPS {
+  id          String      @id @default(uuid())
+  name        String
+  code        String      @unique
+  type        EPSType
+  region      String
+  district    String
+  adresse     String?
+  telephone   String?
+  email       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  users       User[]
+  personnel   Personnel[]
+  patients    Patient[]
+  transactions Transaction[]
+  produits    Produit[]
+  checklists  ChecklistHygiene[]
+  archives    Archive[]
+  realisations RealisationPBF[]
+  
+  @@map("eps")
+}
+
+enum EPSType {
+  CSR           // Centre de Santé de Référence
+  CSU           // Centre de Santé Urbain
+  CSRURAL       // Centre de Santé Rural
+  HOPITAL       // Hôpital
+  DISPENSAIRE   // Dispensaire
+}
+
+// Utilisateurs (authentification gérée par Supabase Auth)
+model User {
+  id            String    @id @default(uuid())
+  epsId         String?
+  eps           EPS?      @relation(fields: [epsId], references: [id])
+  email         String    @unique
+  name          String
+  role          Role      @default(AGENT)
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  DIRECTEUR
+  CHEF_SERVICE
+  MEDECIN
+  INFIRMIER
+  PHARMACIEN
+  AGENT_ADMIN
+  AGENT_HYGIENE
+  AGENT
+}
+
+// Ressources Humaines
+model Personnel {
+  id          String        @id @default(uuid())
+  epsId       String
+  eps         EPS           @relation(fields: [epsId], references: [id])
+  matricule   String
+  nom         String
+  prenom      String
+  fonction    String
+  categorie   String        // A, B, C, D
+  specialite  String?
+  telephone   String?
+  email       String?
+  statut      StatutPersonnel @default(ACTIF)
+  dateRecrutement DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  conges      Conge[]
+  gardes      Garde[]
+  
+  @@unique([epsId, matricule])
+  @@map("personnel")
+}
+
+enum StatutPersonnel {
+  ACTIF
+  CONGE
+  MISSION
+  SUSPENDU
+  RETRAITE
+}
+
+model Conge {
+  id              String        @id @default(uuid())
+  personnelId     String
+  personnel       Personnel     @relation(fields: [personnelId], references: [id])
+  type            TypeConge
+  dateDebut       DateTime
+  dateFin         DateTime
+  statut          StatutConge   @default(EN_ATTENTE)
+  motif           String?
+  approbateurId   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@map("conges")
+}
+
+enum TypeConge {
+  ANNUEL
+  MALADIE
+  MATERNITE
+  PATERNITE
+  SANS_SOLDE
+  AUTRE
+}
+
+enum StatutConge {
+  EN_ATTENTE
+  APPROUVE
+  REFUSE
+}
+
+model Garde {
+  id          String      @id @default(uuid())
+  personnelId String
+  personnel   Personnel   @relation(fields: [personnelId], references: [id])
+  date        DateTime
+  type        TypeGarde
+  service     String?
+  createdAt   DateTime    @default(now())
+  
+  @@map("gardes")
+}
+
+enum TypeGarde {
+  JOUR
+  NUIT
+  WEEKEND
+  FERIE
+}
+
+// Patients
+model Patient {
+  id          String        @id @default(uuid())
+  epsId       String
+  eps         EPS           @relation(fields: [epsId], references: [id])
+  numero      String        // Numéro de dossier
+  nom         String
+  prenom      String
+  dateNaiss   DateTime
+  lieuNaiss   String?
+  genre       Genre
+  telephone   String?
+  adresse     String?
+  personneContact String?
+  telephoneContact String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  consultations Consultation[]
+  ordonnances   Ordonnance[]
+  
+  @@unique([epsId, numero])
+  @@map("patients")
+}
+
+enum Genre {
+  MASCULIN
+  FEMININ
+}
+
+model Consultation {
+  id          String      @id @default(uuid())
+  patientId   String
+  patient     Patient     @relation(fields: [patientId], references: [id])
+  date        DateTime    @default(now())
+  motif       String
+  diagnostic  String?
+  traitement  String?
+  compteRendu String?
+  medecinId   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@map("consultations")
+}
+
+model Ordonnance {
+  id          String          @id @default(uuid())
+  patientId   String
+  patient     Patient         @relation(fields: [patientId], references: [id])
+  date        DateTime        @default(now())
+  medicaments String          // JSON string
+  observations String?
+  createdAt   DateTime        @default(now())
+  
+  @@map("ordonnances")
+}
+
+// Finance et PBF
+model IndicateurPBF {
+  id            String          @id @default(uuid())
+  code          String          @unique
+  nom           String
+  description   String?
+  ponderation   Float
+  unite         String
+  prixUnitaire  Float
+  actif         Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  realisations  RealisationPBF[]
+  
+  @@map("indicateurs_pbf")
+}
+
+model RealisationPBF {
+  id              String          @id @default(uuid())
+  epsId           String
+  eps             EPS             @relation(fields: [epsId], references: [id])
+  indicateurId    String
+  indicateur      IndicateurPBF   @relation(fields: [indicateurId], references: [id])
+  periode         DateTime        // Mois/Trimestre
+  quantite        Float
+  montantCalcule  Float
+  valide          Boolean         @default(false)
+  validePar       String?
+  dateValidation  DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@unique([epsId, indicateurId, periode])
+  @@map("realisations_pbf")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  epsId       String
+  eps         EPS             @relation(fields: [epsId], references: [id])
+  type        TypeTransaction
+  categorie   String
+  montant     Float
+  description String?
+  date        DateTime        @default(now())
+  reference   String?
+  createdAt   DateTime        @default(now())
+  
+  @@map("transactions")
+}
+
+enum TypeTransaction {
+  RECETTE
+  DEPENSE
+  TRANSFERT
+}
+
+// Pharmacie et Stocks
+model Produit {
+  id              String      @id @default(uuid())
+  epsId           String
+  eps             EPS         @relation(fields: [epsId], references: [id])
+  code            String
+  nom             String
+  categorie       String
+  unite           String
+  seuilAlerte     Int         @default(10)
+  prixUnitaire    Float?
+  stockage        String?
+  totalStock      Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  mouvements      MouvementStock[]
+  
+  @@unique([epsId, code])
+  @@map("produits")
+}
+
+model MouvementStock {
+  id          String        @id @default(uuid())
+  produitId   String
+  produit     Produit       @relation(fields: [produitId], references: [id])
+  type        TypeMouvement
+  quantite    Int
+  motif       String?
+  reference   String?
+  date        DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  
+  @@map("mouvements_stock")
+}
+
+enum TypeMouvement {
+  ENTREE
+  SORTIE
+  AJUSTEMENT
+  PEREMPTION
+}
+
+// Hygiène et Sécurité
+model ChecklistHygiene {
+  id          String      @id @default(uuid())
+  epsId       String
+  eps         EPS         @relation(fields: [epsId], references: [id])
+  date        DateTime    @default(now())
+  lieu        String
+  score       Float?
+  items       Json        // JSONB
+  realiseePar String?
+  observations String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@map("checklists_hygiene")
+}
+
+// Archives et Documents
+model Archive {
+  id          String      @id @default(uuid())
+  epsId       String
+  eps         EPS         @relation(fields: [epsId], references: [id])
+  titre       String
+  type        ArchiveType
+  categorie   String
+  date        DateTime
+  format      String
+  auteur      String
+  fichierUrl  String?
+  taille      Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  @@map("archives")
+}
+
+enum ArchiveType {
+  RAPPORT
+  DOCUMENT
+  INVENTAIRE
+  PROTOCOLE
+  LISTE
+}
+
+// Géographie Côte d'Ivoire
+model Region {
+  id          String      @id @default(uuid())
+  nom         String      @unique
+  code        String      @unique
+  createdAt   DateTime    @default(now())
+  
+  districts   District[]
+  
+  @@map("regions")
+}
+
+model District {
+  id          String      @id @default(uuid())
+  nom         String
+  code        String      @unique
+  regionId    String
+  region      Region      @relation(fields: [regionId], references: [id])
+  
+  @@unique([regionId, nom])
+  @@map("districts")
+}
