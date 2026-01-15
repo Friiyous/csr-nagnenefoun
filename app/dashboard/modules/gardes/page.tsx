@@ -248,13 +248,13 @@ export default function GardesPage() {
 
           {/* Filtres */}
           <div className="flex gap-2 flex-wrap print:hidden">
-            <Button variant={selectedService === 'all' ? 'default' : 'outline'} onClick={() => setSelectedService('all')}>
+            <Button variant={selectedService === 'all' ? 'primary' : 'outline'} onClick={() => setSelectedService('all')}>
               Tous services
             </Button>
             {Object.entries(serviceConfig).map(([key, config]) => {
               const Icon = config.icon;
               return (
-                <Button key={key} variant={selectedService === key ? 'default' : 'outline'} onClick={() => setSelectedService(key)} className="flex items-center gap-2">
+                <Button key={key} variant={selectedService === key ? 'primary' : 'outline'} onClick={() => setSelectedService(key)} className="flex items-center gap-2">
                   <Icon className="h-4 w-4" />
                   {config.label}
                 </Button>
