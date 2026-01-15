@@ -423,10 +423,10 @@ export default function FinancePage() {
                       <TableCell><Badge color={getStatutColor(plan.statut)}>{plan.statut}</Badge></TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenModal('activite', plan)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenModal('activite', plan)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenModal('imputation', plan)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenModal('imputation', plan)}>
                             <DollarSign className="h-4 w-4" />
                           </Button>
                         </div>
